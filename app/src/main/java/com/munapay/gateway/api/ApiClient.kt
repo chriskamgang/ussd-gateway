@@ -56,7 +56,7 @@ class ApiClient(private val context: Context) {
                 Log.e(TAG, "Failed to fetch pending: ${response.code}")
                 emptyList()
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.e(TAG, "Network error fetching pending tasks", e)
             emptyList()
         }
@@ -82,7 +82,7 @@ class ApiClient(private val context: Context) {
             val response = client.newCall(request).execute()
             Log.d(TAG, "Report result: ${response.code} for task $taskId")
             response.isSuccessful
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to report result for task $taskId", e)
             false
         }
@@ -112,7 +112,7 @@ class ApiClient(private val context: Context) {
             } else {
                 false
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.e(TAG, "Activation failed", e)
             false
         }
