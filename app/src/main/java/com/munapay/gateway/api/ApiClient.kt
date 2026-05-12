@@ -40,7 +40,7 @@ class ApiClient(private val context: Context) {
     fun getPendingTasks(): List<PendingTask> {
         val request = Request.Builder()
             .url("$baseUrl/api/gateway/pending")
-            .addHeader("accesskey", apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
             .get()
             .build()
 
@@ -74,7 +74,7 @@ class ApiClient(private val context: Context) {
 
         val request = Request.Builder()
             .url("$baseUrl/api/gateway/report")
-            .addHeader("accesskey", apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
             .post(json.toRequestBody(jsonType))
             .build()
 
@@ -89,19 +89,20 @@ class ApiClient(private val context: Context) {
     }
 
     /**
-     * Login as gateway device
+     * Activate gateway with a short code
      */
-    fun login(email: String, password: String): Boolean {
-        val json = gson.toJson(mapOf("email" to email, "password" to password))
+    fun activate(code: String): Boolean {
+        val json = gson.toJson(mapOf("code" to code))
 
         val request = Request.Builder()
-            .url("$baseUrl/api/admin/user/login")
+            .url("$baseUrl/api/gateway/activate")
             .post(json.toRequestBody(jsonType))
             .build()
 
         return try {
             val response = client.newCall(request).execute()
             val body = response.body?.string() ?: "{}"
+            Log.d(TAG, "Activate response: $body")
             val data = gson.fromJson(body, Map::class.java)
 
             val token = data["token"] as? String
@@ -112,8 +113,10 @@ class ApiClient(private val context: Context) {
                 false
             }
         } catch (e: IOException) {
-            Log.e(TAG, "Login failed", e)
+            Log.e(TAG, "Activation failed", e)
             false
         }
     }
+
+    val isActivated: Boolean get() = apiKey.isNotEmpty()
 }

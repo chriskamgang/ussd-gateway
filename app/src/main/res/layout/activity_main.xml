@@ -49,7 +49,7 @@
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Service arrêté"
+                android:text="Non activé"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -74,7 +74,62 @@
 
         </LinearLayout>
 
-        <!-- Start/Stop Button -->
+        <!-- Activation Section (shown when not activated) -->
+        <LinearLayout
+            android:id="@+id/layoutActivation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Activation"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Entrez le code d'activation pour connecter ce téléphone au serveur"
+                android:textColor="#8899AA"
+                android:textSize="13sp"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/etCode"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/input_bg"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#556677"
+                android:hint="Code d'activation"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:letterSpacing="0.3"
+                android:textStyle="bold"
+                android:paddingHorizontal="16dp"
+                android:inputType="text"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnActivate"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Activer"
+                android:backgroundTint="#00D4FF"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Start/Stop Button (shown when activated) -->
         <Button
             android:id="@+id/btnToggle"
             android:layout_width="match_parent"
@@ -84,142 +139,66 @@
             android:textColor="#000000"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Config Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Configuration"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:visibility="gone"
             android:layout_marginBottom="12dp" />
 
-        <!-- API URL -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="URL du serveur"
-            android:textColor="#8899AA"
-            android:textSize="13sp"
-            android:layout_marginBottom="4dp" />
-
-        <EditText
-            android:id="@+id/etBaseUrl"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/input_bg"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#556677"
-            android:hint="https://api.munapay.cm"
-            android:textSize="15sp"
-            android:paddingHorizontal="16dp"
-            android:inputType="textUri"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Admin Email -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email admin"
-            android:textColor="#8899AA"
-            android:textSize="13sp"
-            android:layout_marginBottom="4dp" />
-
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/input_bg"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#556677"
-            android:hint="admin@munapay.cm"
-            android:textSize="15sp"
-            android:paddingHorizontal="16dp"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Admin Password -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mot de passe admin"
-            android:textColor="#8899AA"
-            android:textSize="13sp"
-            android:layout_marginBottom="4dp" />
-
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/input_bg"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#556677"
-            android:hint="••••••"
-            android:textSize="15sp"
-            android:paddingHorizontal="16dp"
-            android:inputType="textPassword"
-            android:layout_marginBottom="12dp" />
-
-        <!-- SIM Selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Carte SIM Camtel"
-            android:textColor="#8899AA"
-            android:textSize="13sp"
-            android:layout_marginBottom="4dp" />
-
-        <RadioGroup
-            android:id="@+id/rgSim"
+        <!-- SIM Selection (shown when activated) -->
+        <LinearLayout
+            android:id="@+id/layoutSim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:background="@drawable/card_bg"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
 
-            <RadioButton
-                android:id="@+id/rbSim1"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SIM 1"
-                android:textColor="#FFFFFF"
-                android:buttonTint="#00D4FF"
-                android:checked="true" />
+                android:text="Carte SIM Camtel"
+                android:textColor="#8899AA"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
 
-            <RadioButton
-                android:id="@+id/rbSim2"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <RadioGroup
+                android:id="@+id/rgSim"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="SIM 2"
-                android:textColor="#FFFFFF"
-                android:buttonTint="#00D4FF" />
+                android:orientation="horizontal">
 
-        </RadioGroup>
+                <RadioButton
+                    android:id="@+id/rbSim1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="SIM 1"
+                    android:textColor="#FFFFFF"
+                    android:buttonTint="#00D4FF"
+                    android:checked="true" />
 
-        <!-- Save Config -->
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Sauvegarder et connecter"
-            android:backgroundTint="#1A2A40"
-            android:textColor="#00D4FF"
-            android:textSize="15sp"
-            android:layout_marginBottom="16dp" />
+                <RadioButton
+                    android:id="@+id/rbSim2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="SIM 2"
+                    android:textColor="#FFFFFF"
+                    android:buttonTint="#00D4FF" />
+
+            </RadioGroup>
+        </LinearLayout>
 
         <!-- Open Accessibility Settings -->
         <Button
             android:id="@+id/btnAccessibility"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="Ouvrir les paramètres d'accessibilité"
+            android:text="Activer l'accessibilité"
             android:backgroundTint="#1A2A40"
             android:textColor="#FF9500"
             android:textSize="14sp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="16dp" />
 
         <!-- Log -->
         <TextView
@@ -240,7 +219,7 @@
             android:textColor="#8899AA"
             android:textSize="12sp"
             android:fontFamily="monospace"
-            android:text="Aucun log..."
+            android:text="En attente d'activation..."
             android:minHeight="150dp"
             android:layout_marginBottom="32dp" />
 

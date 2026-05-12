@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,9 +28,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvAccessibility: TextView
     private lateinit var tvLog: TextView
     private lateinit var btnToggle: Button
-    private lateinit var etBaseUrl: EditText
-    private lateinit var etEmail: EditText
-    private lateinit var etPassword: EditText
+    private lateinit var layoutActivation: LinearLayout
+    private lateinit var layoutSim: LinearLayout
 
     private val handler = Handler(Looper.getMainLooper())
     private val logEntries = mutableListOf<String>()
@@ -52,20 +52,49 @@ class MainActivity : AppCompatActivity() {
         tvAccessibility = findViewById(R.id.tvAccessibility)
         tvLog = findViewById(R.id.tvLog)
         btnToggle = findViewById(R.id.btnToggle)
-        etBaseUrl = findViewById(R.id.etBaseUrl)
-        etEmail = findViewById(R.id.etEmail)
-        etPassword = findViewById(R.id.etPassword)
+        layoutActivation = findViewById(R.id.layoutActivation)
+        layoutSim = findViewById(R.id.layoutSim)
 
-        val btnSave = findViewById<Button>(R.id.btnSave)
+        val etCode = findViewById<EditText>(R.id.etCode)
+        val btnActivate = findViewById<Button>(R.id.btnActivate)
         val btnAccessibility = findViewById<Button>(R.id.btnAccessibility)
         val rgSim = findViewById<RadioGroup>(R.id.rgSim)
 
-        // Load saved config
-        etBaseUrl.setText(apiClient.baseUrl)
+        // Load saved SIM selection
         val prefs = getSharedPreferences("gateway_prefs", MODE_PRIVATE)
         val simSlot = prefs.getInt("sim_slot", 0)
         if (simSlot == 1) {
             findViewById<RadioButton>(R.id.rbSim2).isChecked = true
+        }
+
+        // Show/hide sections based on activation state
+        updateSections()
+
+        // Activate button
+        btnActivate.setOnClickListener {
+            val code = etCode.text.toString().trim()
+            if (code.isEmpty()) {
+                Toast.makeText(this, "Entrez le code d'activation", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            btnActivate.isEnabled = false
+            addLog("Activation en cours...")
+
+            Thread {
+                val success = apiClient.activate(code)
+                handler.post {
+                    btnActivate.isEnabled = true
+                    if (success) {
+                        addLog("Gateway activé avec succès !")
+                        Toast.makeText(this, "Activé !", Toast.LENGTH_SHORT).show()
+                        updateSections()
+                    } else {
+                        addLog("Échec d'activation — code invalide")
+                        Toast.makeText(this, "Code invalide", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
         }
 
         // Toggle service
@@ -77,9 +106,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Save config
-        btnSave.setOnClickListener {
-            saveConfig(rgSim)
+        // SIM selection
+        rgSim.setOnCheckedChangeListener { _, checkedId ->
+            val slot = if (checkedId == R.id.rbSim2) 1 else 0
+            prefs.edit().putInt("sim_slot", slot).apply()
+            addLog("SIM ${slot + 1} sélectionnée")
         }
 
         // Open accessibility settings
@@ -95,10 +126,22 @@ class MainActivity : AppCompatActivity() {
         startStatusUpdater()
     }
 
+    private fun updateSections() {
+        if (apiClient.isActivated) {
+            layoutActivation.visibility = View.GONE
+            btnToggle.visibility = View.VISIBLE
+            layoutSim.visibility = View.VISIBLE
+        } else {
+            layoutActivation.visibility = View.VISIBLE
+            btnToggle.visibility = View.GONE
+            layoutSim.visibility = View.GONE
+        }
+    }
+
     private fun startGateway() {
-        if (apiClient.apiKey.isEmpty()) {
-            addLog("Erreur: veuillez d'abord vous connecter")
-            Toast.makeText(this, "Connectez-vous d'abord", Toast.LENGTH_SHORT).show()
+        if (!apiClient.isActivated) {
+            addLog("Erreur: activez d'abord le gateway")
+            Toast.makeText(this, "Activez d'abord le gateway", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -118,40 +161,6 @@ class MainActivity : AppCompatActivity() {
         addLog("Service arrêté")
     }
 
-    private fun saveConfig(rgSim: RadioGroup) {
-        val baseUrl = etBaseUrl.text.toString().trim()
-        val email = etEmail.text.toString().trim()
-        val password = etPassword.text.toString()
-
-        if (baseUrl.isNotEmpty()) {
-            apiClient.baseUrl = baseUrl
-        }
-
-        val simSlot = if (rgSim.checkedRadioButtonId == R.id.rbSim2) 1 else 0
-        getSharedPreferences("gateway_prefs", MODE_PRIVATE)
-            .edit().putInt("sim_slot", simSlot).apply()
-
-        addLog("Config: SIM ${simSlot + 1}, URL: ${apiClient.baseUrl}")
-
-        if (email.isNotEmpty() && password.isNotEmpty()) {
-            addLog("Connexion en cours...")
-            Thread {
-                val success = apiClient.login(email, password)
-                handler.post {
-                    if (success) {
-                        addLog("Connexion réussie !")
-                        Toast.makeText(this, "Connecté !", Toast.LENGTH_SHORT).show()
-                    } else {
-                        addLog("Échec de connexion")
-                        Toast.makeText(this, "Échec de connexion", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }.start()
-        } else {
-            Toast.makeText(this, "Configuration sauvegardée", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun startStatusUpdater() {
         handler.postDelayed(object : Runnable {
             override fun run() {
@@ -163,7 +172,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI() {
         val running = GatewayService.isRunning
-        tvStatus.text = if (running) GatewayService.lastStatus else "Service arrêté"
+        tvStatus.text = if (running) GatewayService.lastStatus
+            else if (apiClient.isActivated) "Service arrêté" else "Non activé"
         tvStatus.setTextColor(
             if (running) ContextCompat.getColor(this, android.R.color.white)
             else ContextCompat.getColor(this, android.R.color.holo_red_light)

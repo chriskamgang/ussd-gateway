@@ -109,14 +109,10 @@ class GatewayService : Service() {
      * Process a single pending task
      */
     private fun processTask(task: PendingTask) {
-        val ussdCode = when (task.type) {
-            "credit" -> ussdExecutor.buildCreditUssd(task.montant, task.receiver)
-            "forfait" -> task.ussdCode?.let { buildForfaitUssd(it, task.receiver) }
-            else -> null
-        }
+        val ussdCode = task.ussdCode
 
-        if (ussdCode == null) {
-            Log.e(TAG, "Cannot build USSD code for task ${task.id}")
+        if (ussdCode.isNullOrEmpty()) {
+            Log.e(TAG, "No USSD code for task ${task.id}")
             apiClient.reportResult(task.id, false, "Code USSD introuvable")
             return
         }
@@ -160,17 +156,6 @@ class GatewayService : Service() {
             if (resultSuccess) "Succès: tâche ${task.id}"
             else "Échec: tâche ${task.id} — $resultResponse"
         )
-    }
-
-    /**
-     * Build forfait USSD code
-     * The forfait code from DB is like *825*1*2*1*1
-     * We need to append the receiver number: *825*1*2*1*1*receiver#
-     */
-    private fun buildForfaitUssd(code: String, receiver: String): String {
-        val cleanNumber = receiver.removePrefix("237")
-        val cleanCode = code.removeSuffix("#")
-        return "$cleanCode*$cleanNumber#"
     }
 
     private fun updateStatus(status: String) {
