@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">USSD Gateway</string>
+    <string name="accessibility_description">Intercepte les dialogues USSD pour automatiser l\'envoi de crédit et forfaits Camtel.</string>
+</resources>
